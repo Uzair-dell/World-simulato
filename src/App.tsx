@@ -5,8 +5,10 @@ import { registerDefaultBehaviors } from './ai/behaviors';
 import { ControlPanel } from './components/ControlPanel';
 import { SettingsPanel } from './components/SettingsPanel';
 import { ScenarioSelector } from './components/ScenarioSelector';
+import { SimulationManager } from './components/SimulationManager';
 import { scenarios } from './scenarios/Scenario';
 import { Vector2D } from './simulation/physics/Vector2D';
+import { SimulationRecord } from './services/simulationService';
 
 registerDefaultBehaviors();
 
@@ -35,6 +37,7 @@ function App() {
     showEnergy: true,
   });
   const [selectedBehavior, setSelectedBehavior] = useState('resource-seeker');
+  const [showSimulationManager, setShowSimulationManager] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -163,6 +166,22 @@ function App() {
     }
   };
 
+  const handleLoadSimulation = (simulation: SimulationRecord) => {
+    if (simulationRef.current) {
+      simulationRef.current.reset();
+      setIsRunning(false);
+      setStats({
+        tick: 0,
+        fps: 0,
+        agentCount: 0,
+        aliveAgentCount: 0,
+        resourceCount: 0,
+        averageEnergy: 0,
+        averageAge: 0,
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-950 flex flex-col">
       <ControlPanel
@@ -199,6 +218,20 @@ function App() {
         }
         onBehaviorChange={setSelectedBehavior}
       />
+
+      <SimulationManager
+        isOpen={showSimulationManager}
+        onClose={() => setShowSimulationManager(false)}
+        onLoadSimulation={handleLoadSimulation}
+        currentSimulationStats={stats}
+      />
+
+      <button
+        onClick={() => setShowSimulationManager(true)}
+        className="fixed bottom-6 right-6 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg shadow-lg transition z-40"
+      >
+        Simulations
+      </button>
     </div>
   );
 }
